@@ -40,7 +40,7 @@
 #ifdef ENABLE_UART
     #include "app/uart.h"
 #endif
-#include "ARMCM0.h"
+#include "py32f0xx.h"
 #include "audio.h"
 #include "board.h"
 #include "bsp/dp32g030/gpio.h"

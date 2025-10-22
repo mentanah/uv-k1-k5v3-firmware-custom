@@ -41,9 +41,6 @@ if(ENABLE_FEAT_F4HWN)
     if(NOT VERSION_STRING)
         set(VERSION_STRING ${VERSION_STRING_2})
     endif()
-    if(NOT SQL_TONE)
-        set(SQL_TONE 550) # For SA818, use 600 and python3 sa818.py --port /dev/ttyS2 radio --frequency 434.975 --ctcss 71.9 --tail Open
-    endif()
 else()
     if(NOT AUTHOR_STRING)
         set(AUTHOR_STRING "EGZUMER")
@@ -67,6 +64,7 @@ add_subdirectory(Core)
 add_subdirectory(App)
 
 target_link_libraries(${EXE_NAME} Core App)
+
 target_compile_definitions(${EXE_NAME} PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 target_link_libraries(${EXE_NAME} ${TOOLCHAIN_LINK_LIBRARIES})
 

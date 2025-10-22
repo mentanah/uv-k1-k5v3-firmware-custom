@@ -82,7 +82,6 @@
             "name": "Broadcast",
             "inherits": "default",
             "cacheVariables": {
-                "ENABLE_FEAT_F4HWN": true,
                 "ENABLE_SPECTRUM": false,
                 "ENABLE_FMRADIO": true,
                 "ENABLE_VOX": true,

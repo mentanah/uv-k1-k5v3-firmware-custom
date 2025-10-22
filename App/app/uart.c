@@ -17,7 +17,7 @@
 #include <string.h>
 
 #if !defined(ENABLE_OVERLAY)
-    #include "ARMCM0.h"
+    #include "py32f0xx.h"
 #endif
 #ifdef ENABLE_FMRADIO
     #include "app/fm.h"

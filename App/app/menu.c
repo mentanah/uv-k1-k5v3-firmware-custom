@@ -17,7 +17,7 @@
 #include <string.h>
 
 #if !defined(ENABLE_OVERLAY)
-    #include "ARMCM0.h"
+    #include "py32f0xx.h"
 #endif
 #include "app/dtmf.h"
 #include "app/generic.h"
