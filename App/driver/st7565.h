@@ -45,9 +45,9 @@ void ST7565_WriteByte(uint8_t Value);
     #if defined(ENABLE_FEAT_F4HWN_CTR) || defined(ENABLE_FEAT_F4HWN_INV)
     void ST7565_ContrastAndInv(void);
     #endif
-    #if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
+    //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
     void ST7565_Gauge(uint8_t line, uint8_t min, uint8_t max, uint8_t value);
-    #endif
+    //#endif
     int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max);
 #endif
 

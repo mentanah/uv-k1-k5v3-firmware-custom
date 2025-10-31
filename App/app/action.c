@@ -109,11 +109,11 @@ void (*action_opt_table[])(void) = {
     [ACTION_OPT_PTT] = &ACTION_Ptt,
     [ACTION_OPT_WN] = &ACTION_Wn,
     [ACTION_OPT_BACKLIGHT] = &ACTION_BackLight,
-    #if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
+    //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
         [ACTION_OPT_MUTE] = &ACTION_Mute,
-    #else
-        [ACTION_OPT_MUTE] = &FUNCTION_NOP,
-    #endif
+    //#else
+    //    [ACTION_OPT_MUTE] = &FUNCTION_NOP,
+    //#endif
     #ifdef ENABLE_FEAT_F4HWN_RESCUE_OPS
         [ACTION_OPT_POWER_HIGH] = &ACTION_Power_High,
         [ACTION_OPT_REMOVE_OFFSET] = &ACTION_Remove_Offset,
@@ -627,7 +627,7 @@ void ACTION_BackLightOnDemand(void)
     BACKLIGHT_TurnOn();
 }
 
-    #if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
+    //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
     void ACTION_Mute(void)
     {
         // Toggle mute state
@@ -646,7 +646,7 @@ void ACTION_BackLightOnDemand(void)
 
         gUpdateStatus = true;
     }
-    #endif
+    //#endif
 
     #ifdef ENABLE_FEAT_F4HWN_RESCUE_OPS
     void ACTION_Power_High(void)
