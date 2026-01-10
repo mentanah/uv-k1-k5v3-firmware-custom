@@ -225,7 +225,7 @@ void FUNCTION_Transmit()
     }
 #endif
 
-#ifdef ENABLE_FEAT_F4HWN
+#ifdef ENABLE_FEAT_F4HWN__ // calypso
     BK4819_DisableScramble();
 #else
     if (gCurrentVfo->SCRAMBLING_TYPE > 0 && gSetting_ScrambleEnable)

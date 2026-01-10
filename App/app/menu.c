@@ -252,7 +252,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
         case MENU_500TX:
 #endif
         case MENU_350EN:
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__  // calypso
         case MENU_SCREN:
 #endif
 #ifdef ENABLE_FEAT_F4HWN
@@ -268,7 +268,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
             *pMax = ARRAY_SIZE(gModulationStr) - 1;
             break;
 
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__ // calypso
         case MENU_SCR:
             //*pMin = 0;
             *pMax = ARRAY_SIZE(gSubMenu_SCRAMBLER) - 1;
@@ -545,10 +545,10 @@ void MENU_AcceptSetting(void)
             gRequestSaveChannel       = 1;
             return;
 
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__ // calypso
         case MENU_SCR:
             gTxVfo->SCRAMBLING_TYPE = gSubMenuSelection;
-            #if 0
+            #if 1 // calypso
                 if (gSubMenuSelection > 0 && gSetting_ScrambleEnable)
                     BK4819_EnableScramble(gSubMenuSelection - 1);
                 else
@@ -865,7 +865,7 @@ void MENU_AcceptSetting(void)
             gVfoConfigureMode    = VFO_CONFIGURE_RELOAD;
             gFlagResetVfos       = true;
             break;
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__ // calypso
         case MENU_SCREN:
             gSetting_ScrambleEnable = gSubMenuSelection;
             gFlagReconfigureVfos    = true;
@@ -1078,7 +1078,7 @@ void MENU_ShowCurrentSetting(void)
             gSubMenuSelection = gTxVfo->CHANNEL_BANDWIDTH;
             break;
 
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__ // calypso
         case MENU_SCR:
             gSubMenuSelection = gTxVfo->SCRAMBLING_TYPE;
             break;
@@ -1317,7 +1317,7 @@ void MENU_ShowCurrentSetting(void)
             gSubMenuSelection = gSetting_350EN;
             break;
 
-#ifndef ENABLE_FEAT_F4HWN
+#ifndef ENABLE_FEAT_F4HWN__ // calypso
         case MENU_SCREN:
             gSubMenuSelection = gSetting_ScrambleEnable;
             break;
