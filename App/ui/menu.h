@@ -103,7 +103,7 @@ enum
     MENU_VOL,
     MENU_BAT_TXT,
     MENU_AM,
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
     MENU_AM_FIX,
 #endif
 #ifndef ENABLE_FEAT_F4HWN
@@ -138,7 +138,9 @@ enum
     MENU_SET_LCK,
     MENU_SET_MET,
     MENU_SET_GUI,
+    #ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER    //calypso
     MENU_SET_TMR,
+    #endif
     #ifdef ENABLE_FEAT_F4HWN_NARROWER
         MENU_SET_NFM,
     #endif

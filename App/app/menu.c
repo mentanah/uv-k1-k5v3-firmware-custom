@@ -225,7 +225,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
             break;
 
         #ifndef ENABLE_FEAT_F4HWN
-            #ifdef ENABLE_AM_FIX
+            #ifdef ENABLE_AM_FIX__
                 case MENU_AM_FIX:
             #endif
         #endif
@@ -256,7 +256,9 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
         case MENU_SCREN:
 #endif
 #ifdef ENABLE_FEAT_F4HWN
+        #ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER    // calypso
         case MENU_SET_TMR:
+        #endif
 #endif
             //*pMin = 0;
             *pMax = ARRAY_SIZE(gSubMenu_OFF_ON) - 1;
@@ -795,7 +797,7 @@ void MENU_AcceptSetting(void)
             return;
 
         #ifndef ENABLE_FEAT_F4HWN
-            #ifdef ENABLE_AM_FIX
+            #ifdef ENABLE_AM_FIX__
                 case MENU_AM_FIX:
                     gSetting_AM_fix = gSubMenuSelection;
                     gVfoConfigureMode = VFO_CONFIGURE_RELOAD;
@@ -963,9 +965,11 @@ void MENU_AcceptSetting(void)
                 gEeprom.SET_KEY = gSubMenuSelection;
                 break;
         #endif
+        #ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER    // calypso
         case MENU_SET_TMR:
             gSetting_set_tmr = gSubMenuSelection;
             break;
+        #endif    
         case MENU_TX_LOCK:
             gTxVfo->TX_LOCK = gSubMenuSelection;
             gRequestSaveChannel       = 1;
@@ -1268,7 +1272,7 @@ void MENU_ShowCurrentSetting(void)
             break;
 
 #ifndef ENABLE_FEAT_F4HWN
-    #ifdef ENABLE_AM_FIX
+    #ifdef ENABLE_AM_FIX__
             case MENU_AM_FIX:
                 gSubMenuSelection = gSetting_AM_fix;
                 break;
@@ -1408,9 +1412,11 @@ void MENU_ShowCurrentSetting(void)
                 gSubMenuSelection = gEeprom.SET_KEY;
                 break;
         #endif
+        #ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER    // calypso
         case MENU_SET_TMR:
             gSubMenuSelection = gSetting_set_tmr;
             break;
+        #endif
         case MENU_TX_LOCK:
             gSubMenuSelection = gTxVfo->TX_LOCK;
             break;

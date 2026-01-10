@@ -304,7 +304,7 @@ void SETTINGS_InitEEPROM(void)
         gSetting_mic_bar       = !!(Data[7] & (1u << 4));
     #endif
     #ifndef ENABLE_FEAT_F4HWN
-        #ifdef ENABLE_AM_FIX
+        #ifdef ENABLE_AM_FIX__
             gSetting_AM_fix        = !!(Data[7] & (1u << 5));
         #endif
     #endif
@@ -850,7 +850,7 @@ void SETTINGS_SaveSettings(void)
         if (!gSetting_mic_bar)           State[7] &= ~(1u << 4);
     #endif
     #ifndef ENABLE_FEAT_F4HWN
-        #ifdef ENABLE_AM_FIX
+        #ifdef ENABLE_AM_FIX__
             if (!gSetting_AM_fix)            State[7] &= ~(1u << 5);
         #endif
     #endif
@@ -1100,7 +1100,7 @@ State[1] = 0
 #ifdef ENABLE_FEAT_F4HWN_GAME
     | (1 << 3)
 #endif
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
     | (1 << 4)
 #endif
 #ifdef ENABLE_SPECTRUM

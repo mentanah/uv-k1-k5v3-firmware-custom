@@ -127,7 +127,7 @@ const t_menu_item MenuList[] =
 #endif
     {"D Live",      MENU_D_LIVE_DEC    }, // live DTMF decoder
 #ifndef ENABLE_FEAT_F4HWN
-    #ifdef ENABLE_AM_FIX
+    #ifdef ENABLE_AM_FIX__
         {"AM Fix",      MENU_AM_FIX        },
     #endif
 #endif
@@ -149,7 +149,9 @@ const t_menu_item MenuList[] =
     {"SetLck",      MENU_SET_LCK       },
     {"SetMet",      MENU_SET_MET       },
     {"SetGUI",      MENU_SET_GUI       },
+#ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER    // calypso
     {"SetTmr",      MENU_SET_TMR       },
+#endif    
 #ifdef ENABLE_FEAT_F4HWN_SLEEP
     {"SetOff",       MENU_SET_OFF      },
 #endif
@@ -781,7 +783,7 @@ void UI_DisplayMenu(void)
             break;
 
         #ifndef ENABLE_FEAT_F4HWN
-            #ifdef ENABLE_AM_FIX
+            #ifdef ENABLE_AM_FIX__
                 case MENU_AM_FIX:
             #endif
         #endif
@@ -809,7 +811,9 @@ void UI_DisplayMenu(void)
         case MENU_SCREN:
 #endif
 #ifdef ENABLE_FEAT_F4HWN
+        #ifdef ENABLE_FEAT_F4HWN_RX_TX_TIMER //calypso
         case MENU_SET_TMR:
+        #endif
 #endif
             strcpy(String, gSubMenu_OFF_ON[gSubMenuSelection]);
             break;

@@ -20,11 +20,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
     void AM_fix_init(void);
     void AM_fix_reset(const unsigned vfo);
     void AM_fix_10ms(const unsigned vfo);
-    #ifdef ENABLE_AM_FIX_SHOW_DATA
+    #ifdef ENABLE_AM_FIX___SHOW_DATA
         void AM_fix_print_data(const unsigned vfo, char *s);
     #endif
     int8_t AM_fix_get_gain_diff();

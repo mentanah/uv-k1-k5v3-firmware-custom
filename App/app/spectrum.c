@@ -471,7 +471,7 @@ uint16_t GetRssi()
         SYSTICK_DelayUs(100);
     }
     uint16_t rssi = BK4819_GetRSSI();
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
     if (settings.modulationType == MODULATION_AM && gSetting_AM_fix)
         rssi += AM_fix_get_gain_diff() * 2;
 #endif
@@ -1702,7 +1702,7 @@ static void UpdateListening()
 
 static void Tick()
 {
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
     if (gNextTimeslice)
     {
         gNextTimeslice = false;

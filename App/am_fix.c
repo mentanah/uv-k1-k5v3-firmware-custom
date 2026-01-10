@@ -34,7 +34,7 @@
 #include "ui/main.h"
 #endif
 
-#ifdef ENABLE_AM_FIX
+#ifdef ENABLE_AM_FIX__
 
 typedef struct
 {
@@ -208,7 +208,7 @@ typedef union  {
 #endif
 
 
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
     // display update rate
     static const unsigned int display_update_rate = 250 / 10;   // max 250ms display update rate
     unsigned int counter = 0;
@@ -242,7 +242,7 @@ void AM_fix_reset(const unsigned vfo)
     if (vfo > 1)
         return;
 
-    #ifdef ENABLE_AM_FIX_SHOW_DATA
+    #ifdef ENABLE_AM_FIX___SHOW_DATA
         counter = 0;
     #endif
 
@@ -264,13 +264,13 @@ void AM_fix_10ms(const unsigned vfo)
         return;
 
     if (gCurrentFunction != FUNCTION_FOREGROUND && !FUNCTION_IsRx()) {
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
         counter = display_update_rate;  // queue up a display update as soon as we switch to RX mode
 #endif
         return;
     }
 
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
     if (counter > 0) {
         if (++counter >= display_update_rate) { // trigger a display update
             counter        = 0;
@@ -293,7 +293,7 @@ void AM_fix_10ms(const unsigned vfo)
         prev_rssi[vfo]         = new_rssi;
     }
 
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
     {
         static int16_t lastRssi;
 
@@ -367,7 +367,7 @@ void AM_fix_10ms(const unsigned vfo)
 #endif
     }
 
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
     if (counter == 0) {
         counter        = 1;
         gUpdateDisplay = true;
@@ -375,7 +375,7 @@ void AM_fix_10ms(const unsigned vfo)
 #endif
 }
 
-#ifdef ENABLE_AM_FIX_SHOW_DATA
+#ifdef ENABLE_AM_FIX___SHOW_DATA
 void AM_fix_print_data(const unsigned vfo, char *s) {
     if (s != NULL && vfo < ARRAY_SIZE(gain_table_index)) {
         const unsigned int index = gain_table_index[vfo];
