@@ -41,9 +41,7 @@ enum
     MENU_OFFSET,
     MENU_TOT,
     MENU_W_N,
-#ifndef ENABLE_FEAT_F4HWN__ // calypso
     MENU_SCR,
-#endif
     MENU_BCL,
 #ifdef ENABLE_FEAT_F4HWN
     MENU_TX_LOCK, 
@@ -119,9 +117,7 @@ enum
     MENU_500TX,
 #endif
     MENU_350EN,
-#ifndef ENABLE_FEAT_F4HWN__ // calypso
     MENU_SCREN,
-#endif
 #ifdef ENABLE_F_CAL_MENU
     MENU_F_CALI,  // reference xtal calibration
 #endif
@@ -211,10 +207,7 @@ extern const char* const gSubMenu_F_LOCK[F_LOCK_LEN];
 extern const char        gSubMenu_RX_TX[4][6];
 extern const char        gSubMenu_BAT_TXT[3][8];
 extern const char        gSubMenu_BATTYP[5][12];
-
-#ifndef ENABLE_FEAT_F4HWN__ // calypso
-    extern const char        gSubMenu_SCRAMBLER[11][7];
-#endif
+extern const char        gSubMenu_SCRAMBLER[11][7];
 
 typedef struct {char* name; uint8_t id;} t_sidefunction;
 extern const uint8_t         gSubMenu_SIDEFUNCTIONS_size;

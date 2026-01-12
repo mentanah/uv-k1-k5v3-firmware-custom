@@ -1332,11 +1332,11 @@ void UI_DisplayMain(void)
             UI_PrintStringSmallNormal("DTMF", LCD_WIDTH + 78, 0, line + 1);
 #endif
 
-#ifndef ENABLE_FEAT_F4HWN__ // calypso
-        // show the audio scramble symbol
+
+        // show the audio scramble symbol  // calypso test
         if (vfoInfo->SCRAMBLING_TYPE > 0 && gSetting_ScrambleEnable)
-            UI_PrintStringSmallNormal("SCR", LCD_WIDTH + 106, 0, line + 1);
-#endif
+            //UI_PrintStringSmallNormal("SCR", LCD_WIDTH + 106, 0, line + 1);
+            UI_PrintStringSmallNormal("SCR", LCD_WIDTH + 1, 0, line + 2);
 
 #ifdef ENABLE_FEAT_F4HWN
         /*
