@@ -6,8 +6,8 @@ set -euo pipefail
 #   ./compile-with-docker.sh [Preset] [CMake options...]
 # Examples:
 #   ./compile-with-docker.sh Calypso
-#   ./compile-with-docker.sh Bandscope -DENABLE_SPECTRUM=ON
-#   ./compile-with-docker.sh Broadcast -DENABLE_FEAT_F4HWN_GAME=ON -DENABLE_NOAA=ON
+#   ./compile-with-docker.sh Calypso -DENABLE_SPECTRUM=ON
+#   ./compile-with-docker.sh Calypso -DENABLE_FEAT_F4HWN_GAME=ON -DENABLE_NOAA=ON
 #   ./compile-with-docker.sh All
 # Default preset: "Calypso"
 # ---------------------------------------------
