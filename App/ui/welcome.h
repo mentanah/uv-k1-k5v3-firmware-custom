@@ -17,7 +17,26 @@
 #ifndef UI_WELCOME_H
 #define UI_WELCOME_H
 
+// ============================================================================
+// BOOT AND WELCOME DISPLAYS
+// ============================================================================
+
+/**
+ * @brief Display "Release Keys" prompt during boot
+ * 
+ * Shown when user is holding down buttons/PTT during power-on.
+ * Prompts user to release all keys before radio initialization completes.
+ * Blocks startup sequence until keys are released.
+ */
 void UI_DisplayReleaseKeys(void);
+
+/**
+ * @brief Display welcome/splash screen at power-on
+ * 
+ * Shows radio version, serial number, or custom message.
+ * Displayed during boot countdown if POWER_ON_DISPLAY_MODE is enabled.
+ * Automatically hidden after 2.55 seconds or on any key press.
+ */
 void UI_DisplayWelcome(void);
 
 #endif

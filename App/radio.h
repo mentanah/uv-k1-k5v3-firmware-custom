@@ -151,23 +151,94 @@ extern DCS_CodeType_t gCurrentCodeType;
 extern VfoState_t     VfoState[2];
 
 bool     RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t scanList);
+/**
+ * @brief Finds the next channel based on the current channel number and the direction.
+ *
+ * @param ChNum The current channel number.
+ * @param Direction The direction to search for the next channel.
+ * @param bCheckScanList Flag to indicate if the scan list should be checked.
+ * @param RadioNum The radio number.
+ * @return The next channel number.
+ */
 uint8_t  RADIO_FindNextChannel(uint8_t ChNum, int8_t Direction, bool bCheckScanList, uint8_t RadioNum);
+/**
+ * @brief Initializes the radio information structure.
+ *
+ * @param pInfo Pointer to the VFO_Info_t structure to initialize.
+ * @param ChannelSave The channel to save.
+ * @param Frequency The frequency to set.
+ */
 void     RADIO_InitInfo(VFO_Info_t *pInfo, const uint8_t ChannelSave, const uint32_t Frequency);
+/**
+ * @brief Configures the radio channel.
+ *
+ * @param VFO The VFO number.
+ * @param configure The configuration value.
+ */
 void     RADIO_ConfigureChannel(const unsigned int VFO, const unsigned int configure);
+/**
+ * @brief Configures the squelch and output power settings.
+ *
+ * @param pInfo Pointer to the VFO_Info_t structure.
+ */
 void     RADIO_ConfigureSquelchAndOutputPower(VFO_Info_t *pInfo);
+/**
+ * @brief Applies the offset frequency to the radio.
+ *
+ * @param pInfo Pointer to the VFO_Info_t structure.
+ */
 void     RADIO_ApplyOffset(VFO_Info_t *pInfo);
+/**
+ * @brief Selects the VFOs for operation.
+ */
 void     RADIO_SelectVfos(void);
+/**
+ * @brief Sets up the radio registers.
+ *
+ * @param switchToForeground Flag to indicate if switching to foreground.
+ */
 void     RADIO_SetupRegisters(bool switchToForeground);
 #ifdef ENABLE_NOAA
     void RADIO_ConfigureNOAA(void);
 #endif
+/**
+ * @brief Sets the transmission parameters for the radio.
+ */
 void     RADIO_SetTxParameters(void);
+/**
+ * @brief Sets up the AGC (Automatic Gain Control) settings.
+ *
+ * @param listeningAM Flag to indicate if listening to AM.
+ * @param disable Flag to disable AGC.
+ */
 void     RADIO_SetupAGC(bool listeningAM, bool disable);
+/**
+ * @brief Sets the modulation mode for the radio.
+ *
+ * @param modulation The modulation mode to set.
+ */
 void     RADIO_SetModulation(ModulationMode_t modulation);
+/**
+ * @brief Sets the VFO state.
+ *
+ * @param State The VfoState_t value to set.
+ */
 void     RADIO_SetVfoState(VfoState_t State);
+/**
+ * @brief Prepares the radio for transmission.
+ */
 void     RADIO_PrepareTX(void);
+/**
+ * @brief Sends the CSS tail sequence.
+ */
 void     RADIO_SendCssTail(void);
+/**
+ * @brief Prepares the CSS for transmission.
+ */
 void     RADIO_PrepareCssTX(void);
+/**
+ * @brief Sends the end of transmission signal.
+ */
 void     RADIO_SendEndOfTransmission(void);
 
 #endif

@@ -76,22 +76,45 @@ const char *VfoStateStr[] = {
        [VFO_STATE_VOLTAGE_HIGH]="VOLT HIGH"
 };
 
-// ***************************************************************************
+// ============================================================================
+// DISPLAY HELPER FUNCTIONS
+// ============================================================================
 
+/**
+ * @brief Draw small antenna icon with signal strength bars
+ * @param p Pointer to frame buffer line
+ * @param level Signal level 0-6 (used for bar count)
+ * 
+ * Creates a small antenna icon followed by 0-6 signal strength bars
+ */
 static void DrawSmallAntennaAndBars(uint8_t *p, unsigned int level)
 {
+    // Clamp level to valid range (0-6 bars)
     if(level>6)
         level = 6;
 
+    // Copy antenna bitmap to frame buffer
     memcpy(p, BITMAP_Antenna, ARRAY_SIZE(BITMAP_Antenna));
 
+    // Draw signal strength bars (1 pixel per bar level)
     for(uint8_t i = 1; i <= level; i++) {
         char bar = (0xff << (6-i)) & 0x7F;
         memset(p + 2 + i*3, bar, 2);
     }
 }
+
 #if defined ENABLE_AUDIO_BAR || defined ENABLE_RSSI_BAR
 
+/**
+ * @brief Draw a horizontal level bar graph
+ * @param xpos X coordinate of bar start
+ * @param line Frame buffer line number
+ * @param level Current level to display (0-bars)
+ * @param bars Maximum bar count
+ * 
+ * Draws visual representation with filled bars for levels 0-(bars-4)
+ * and hollow bars for levels (bars-4) to bars for fine detail
+ */
 static void DrawLevelBar(uint8_t xpos, uint8_t line, uint8_t level, uint8_t bars)
 {
 #ifndef ENABLE_FEAT_F4HWN
@@ -163,7 +186,14 @@ static void DrawLevelBar(uint8_t xpos, uint8_t line, uint8_t level, uint8_t bars
 
 #ifdef ENABLE_AUDIO_BAR
 
-// Approximation of a logarithmic scale using integer arithmetic
+/**
+ * @brief Approximate logarithmic scale using integer arithmetic
+ * @param value Input value to convert
+ * @return log2 approximation
+ * 
+ * Used for converting linear audio amplitude to logarithmic display
+ * Avoids floating point and expensive operations
+ */
 uint8_t log2_approx(unsigned int value) {
     uint8_t log = 0;
     while (value >>= 1) {
@@ -172,6 +202,18 @@ uint8_t log2_approx(unsigned int value) {
     return log;
 }
 
+/**
+ * @brief Display microphone audio level bar during transmission
+ * 
+ * Shows real-time microphone input level as a visual bar graph.
+ * Only active when:
+ * - Microphone bar setting enabled
+ * - Currently transmitting
+ * - Main display is active
+ * - No DTMF call in progress
+ * 
+ * Uses logarithmic scaling for natural audio level perception
+ */
 void UI_DisplayAudioBar(void)
 {
     if (gSetting_mic_bar)
@@ -235,6 +277,25 @@ void UI_DisplayAudioBar(void)
 }
 #endif
 
+// ============================================================================
+// RSSI SIGNAL STRENGTH DISPLAY
+// ============================================================================
+
+/**
+ * @brief Display RSSI (Received Signal Strength Indicator) bar
+ * @param now Force immediate screen update
+ * 
+ * Shows signal strength graphically with:
+ * - S-meter scale (S0-S9, then +dBm above S9)
+ * - Signal strength bar graph
+ * - Raw RSSI value in dBm
+ * 
+ * Frequency band corrections applied via dBmCorrTable
+ * Only displayed when:
+ * - Currently receiving
+ * - Main display is active
+ * - No DTMF call in progress
+ */
 void DisplayRSSIBar(const bool now)
 {
 #if defined(ENABLE_RSSI_BAR)
@@ -415,6 +476,17 @@ void DisplayRSSIBar(const bool now)
 }
 
 #ifdef ENABLE_AGC_SHOW_DATA
+/**
+ * @brief Debug display for AGC internal state
+ * @param now Force immediate screen update
+ * 
+ * Shows AGC gain configuration for troubleshooting RX levels:
+ * - AGC enable flag
+ * - Gain index
+ * - Calculated gain in dB
+ * - Signal strength
+ * - RSSI raw value
+ */
 void UI_MAIN_PrintAGC(bool now)
 {
     char buf[20];
@@ -453,14 +525,34 @@ void UI_MAIN_PrintAGC(bool now)
 }
 #endif
 
+// ============================================================================
+// DISPLAY UPDATE TIMESLICE
+// ============================================================================
+
+/**
+ * @brief 500ms timeslice updates for main display
+ * 
+ * Called periodically to update display elements that change
+ * at slower rates than the main loop (RSSI bar, audio bar, LEDs)
+ * 
+ * Handles:
+ * - RSSI bar updates (every 500ms)
+ * - Audio level bar updates
+ * - RX LED blinking/indication
+ * - End-of-transmission (EOT) visual/audio feedback
+ */
 void UI_MAIN_TimeSlice500ms(void)
 {
+    // Only update if main display is active
     if(gScreenToDisplay==DISPLAY_MAIN) {
+
 #ifdef ENABLE_AGC_SHOW_DATA
+        // Debug: show AGC data on center line
         UI_MAIN_PrintAGC(true);
         return;
 #endif
 
+        // Update RSSI bar during reception
         if(FUNCTION_IsRx()) {
             DisplayRSSIBar(true);
         }
@@ -516,26 +608,59 @@ void UI_MAIN_TimeSlice500ms(void)
     }
 }
 
-// ***************************************************************************
+// ============================================================================
+// MAIN DISPLAY RENDERING
+// ============================================================================
 
+/**
+ * @brief Render main frequency/channel display
+ * 
+ * This is the primary display showing:
+ * - VFO A and VFO B with frequencies/channels
+ * - TX/RX status and modulation
+ * - Signal strength indicators
+ * - TX power and offset information
+ * - Scan list assignments
+ * - Battery status
+ * 
+ * Layout (2 VFO mode):
+ *  Line 0-1: VFO A frequency/channel + status
+ *  Line 2-3: Center line (RSSI, DTMF, audio, etc.)
+ *  Line 4-5: VFO B frequency/channel + status
+ *  Line 6-7: Status bar (battery, lock, etc.)
+ * 
+ * Layout (Main Only mode):
+ *  Line 0-3: Active VFO with large frequency display
+ *  Line 4-5: Center information (RSSI, audio, etc.)
+ *  Line 6: Status/VFO indicator
+ */
 void UI_DisplayMain(void)
 {
-    char               String[22];
+    char String[22];  // String buffer for formatted text
 
-    center_line = CENTER_LINE_NONE;
+    center_line = CENTER_LINE_NONE;  // Center line initially available
 
-    // clear the screen
+    // Clear screen and prepare frame buffer
     UI_DisplayClear();
 
+    // ================================================================
+    // CHECK FOR LOW BATTERY ALERT
+    // ================================================================
+    
     if(gLowBattery && !gLowBatteryConfirmed) {
+        // Display battery critical warning and block further operation
         UI_DisplayPopup("LOW BATTERY");
         ST7565_BlitFullScreen();
         return;
     }
 
+    // ================================================================
+    // CHECK FOR KEYPAD LOCK ALERT
+    // ================================================================
+    
 #ifndef ENABLE_FEAT_F4HWN
     if (gEeprom.KEY_LOCK && gKeypadLocked > 0)
-    {   // tell user how to unlock the keyboard
+    {   // Display keypad lock message
         UI_PrintString("Long press #", 0, LCD_WIDTH, 1, 8);
         UI_PrintString("to unlock",    0, LCD_WIDTH, 3, 8);
         ST7565_BlitFullScreen();
@@ -570,8 +695,14 @@ void UI_DisplayMain(void)
     }
 #endif
 
+    // ================================================================
+    // RENDER VFO DISPLAYS
+    // ================================================================
+    
+    // Determine which VFO is active for TX
     unsigned int activeTxVFO = gRxVfoIsActive ? gEeprom.RX_VFO : gEeprom.TX_VFO;
 
+    // Render both VFOs (or single VFO in main-only mode)
     for (unsigned int vfo_num = 0; vfo_num < 2; vfo_num++)
     {
 #ifdef ENABLE_FEAT_F4HWN

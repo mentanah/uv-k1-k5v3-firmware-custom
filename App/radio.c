@@ -53,6 +53,17 @@ const char gModulationStr[MODULATION_UKNOWN][4] = {
 #endif
 };
 
+// ============================================================================
+// CHANNEL AND VFO MANAGEMENT
+// ============================================================================
+
+/**
+ * @brief Check if a channel is valid and passes scan list criteria
+ * @param channel Channel number to validate
+ * @param checkScanList Enable scan list participation checking
+ * @param scanList Scan list index (1-4) or 0 for channels not in any list
+ * @return true if channel is valid and meets criteria, false otherwise
+ */
 bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t scanList)
 {
     // return true if the channel appears valid
@@ -111,6 +122,14 @@ bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t scanL
     return PriorityCh1 != channel && PriorityCh2 != channel;
 }
 
+/**
+ * @brief Find the next valid channel in the specified direction
+ * @param Channel Starting channel number
+ * @param Direction +1 for next, -1 for previous
+ * @param bCheckScanList Only accept channels in specified scan list
+ * @param VFO Scan list number (0-3)
+ * @return Next valid channel or 0xFF if none found
+ */
 uint8_t RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, bool bCheckScanList, uint8_t VFO)
 {
     for (unsigned int i = 0; IS_MR_CHANNEL(i); i++, Channel += Direction) {
@@ -128,6 +147,12 @@ uint8_t RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, bool bCheckScan
     return 0xFF;
 }
 
+/**
+ * @brief Initialize VFO info structure with default values
+ * @param pInfo Pointer to VFO_Info_t structure
+ * @param ChannelSave Channel save index (memory channel or freq band)
+ * @param Frequency Starting frequency in Hz
+ */
 void RADIO_InitInfo(VFO_Info_t *pInfo, const uint8_t ChannelSave, const uint32_t Frequency)
 {
     memset(pInfo, 0, sizeof(*pInfo));
@@ -156,6 +181,12 @@ void RADIO_InitInfo(VFO_Info_t *pInfo, const uint8_t ChannelSave, const uint32_t
     RADIO_ConfigureSquelchAndOutputPower(pInfo);
 }
 
+/**
+ * @brief Configure a VFO with channel data from EEPROM
+ * @param VFO VFO index (0 or 1)
+ * @param configure Configuration mode (VFO_CONFIGURE_RELOAD or other)
+ * Loads frequency, offset, codes, power settings from EEPROM and validates ranges
+ */
 void RADIO_ConfigureChannel(const unsigned int VFO, const unsigned int configure)
 {
     VFO_Info_t *pVfo = &gEeprom.VfoInfo[VFO];
@@ -426,6 +457,15 @@ void RADIO_ConfigureChannel(const unsigned int VFO, const unsigned int configure
     RADIO_ConfigureSquelchAndOutputPower(pVfo);
 }
 
+/**
+ * @brief Calculate and apply squelch thresholds and TX power settings
+ * @param pInfo Pointer to VFO_Info_t structure
+ * 
+ * Configures:
+ * - Squelch open/close thresholds (RSSI, noise, glitch)
+ * - TX power calibration based on frequency band and selected power level
+ * - Output power adjusted for custom power reduction modes
+ */
 void RADIO_ConfigureSquelchAndOutputPower(VFO_Info_t *pInfo)
 {
 
@@ -628,6 +668,13 @@ void RADIO_ConfigureSquelchAndOutputPower(VFO_Info_t *pInfo)
     // *******************************
 }
 
+/**
+ * @brief Apply TX frequency offset to RX frequency
+ * @param pInfo Pointer to VFO_Info_t structure
+ * 
+ * Applies the configured offset direction (off, add, subtract) to calculate
+ * the actual TX frequency from the RX frequency
+ */
 void RADIO_ApplyOffset(VFO_Info_t *pInfo)
 {
     uint32_t Frequency = pInfo->freq_config_RX.Frequency;
@@ -647,6 +694,10 @@ void RADIO_ApplyOffset(VFO_Info_t *pInfo)
     pInfo->freq_config_TX.Frequency = Frequency;
 }
 
+/**
+ * @brief Select which VFO is used for RX based on crossband/dualwatch settings
+ * Sets gCurrentVfo based on operating mode
+ */
 static void RADIO_SelectCurrentVfo(void)
 {
     // if crossband is active and DW not the gCurrentVfo is gTxVfo (gTxVfo/TX_VFO is only ever changed by the user)
@@ -656,6 +707,14 @@ static void RADIO_SelectCurrentVfo(void)
     gCurrentVfo = (gEeprom.CROSS_BAND_RX_TX == CROSS_BAND_OFF || gEeprom.DUAL_WATCH != DUAL_WATCH_OFF) ? gRxVfo : gTxVfo;
 }
 
+/**
+ * @brief Update RX_VFO selection based on crossband and dual watch modes
+ * 
+ * Operating modes:
+ * - Normal: RX_VFO = TX_VFO (single VFO)
+ * - Dual Watch: RX_VFO = TX_VFO (DW handled elsewhere)
+ * - Crossband: RX_VFO = !TX_VFO (opposite VFO for RX)
+ */
 void RADIO_SelectVfos(void)
 {
     // if crossband without DW is used then RX_VFO is the opposite to the TX_VFO
@@ -667,6 +726,21 @@ void RADIO_SelectVfos(void)
     RADIO_SelectCurrentVfo();
 }
 
+// ============================================================================
+// RADIO HARDWARE CONFIGURATION
+// ============================================================================
+
+/**
+ * @brief Setup BK4819 registers for RX with current VFO settings
+ * @param switchToForeground Switch function to FOREGROUND after setup
+ * 
+ * Configures:
+ * - Filter bandwidth (wide/narrow/AM)
+ * - RX frequency and squelch
+ * - Modulation and tone decoding (CTCSS/DCS/NOAA)
+ * - Interrupt masks for signal detection
+ * - AGC and audio levels
+ */
 void RADIO_SetupRegisters(bool switchToForeground)
 {
     BK4819_FilterBandwidth_t Bandwidth = gRxVfo->CHANNEL_BANDWIDTH;
@@ -859,6 +933,10 @@ void RADIO_SetupRegisters(bool switchToForeground)
 }
 
 #ifdef ENABLE_NOAA
+    /**
+     * @brief Configure NOAA weather radio if enabled and active
+     * Handles dual-watch NOAA channel selection and countdown timers
+     */
     void RADIO_ConfigureNOAA(void)
     {
         uint8_t ChanAB;
@@ -903,6 +981,10 @@ void RADIO_SetupRegisters(bool switchToForeground)
     }
 #endif
 
+/**
+ * @brief Setup TX parameters including modulation and companding
+ * Called before transmission to configure all TX-specific hardware
+ */
 void RADIO_SetTxParameters(void)
 {
     BK4819_FilterBandwidth_t Bandwidth = gCurrentVfo->CHANNEL_BANDWIDTH;
@@ -970,6 +1052,15 @@ void RADIO_SetTxParameters(void)
     }
 }
 
+/**
+ * @brief Set the radio modulation mode (FM/AM/USB/etc)
+ * @param modulation Modulation mode to activate
+ * 
+ * Applies modulation-specific register settings including:
+ * - AF type configuration
+ * - AM-specific register adjustments
+ * - Bandwidth and filter settings
+ */
 void RADIO_SetModulation(ModulationMode_t modulation)
 {
     BK4819_AF_Type_t mod;
@@ -1036,6 +1127,14 @@ void RADIO_SetModulation(ModulationMode_t modulation)
 
 }
 
+/**
+ * @brief Setup Automatic Gain Control for RX
+ * @param listeningAM Enable AM-specific AGC tuning
+ * @param disable Disable AGC entirely
+ * 
+ * Currently disables both parameters per firmware design.
+ * Optimizes AGC for FM or AM reception modes.
+ */
 void RADIO_SetupAGC(bool listeningAM, bool disable)
 {  
     listeningAM = false;
@@ -1059,6 +1158,23 @@ void RADIO_SetupAGC(bool listeningAM, bool disable)
     }
 }
 
+// ============================================================================
+// VFO STATE MANAGEMENT
+// ============================================================================
+
+/**
+ * @brief Set the current VFO state (normal, busy, low battery, etc)
+ * @param State VFO state to set (VFO_STATE_t enum)
+ * 
+ * States indicate why TX might be disabled:
+ * - VFO_STATE_NORMAL: OK to transmit
+ * - VFO_STATE_BUSY: RX in progress
+ * - VFO_STATE_BAT_LOW: Battery critically low
+ * - VFO_STATE_TX_DISABLE: TX frequency/mode not allowed
+ * - VFO_STATE_VOLTAGE_HIGH: Over-voltage detected
+ * - VFO_STATE_TIMEOUT: TX timeout reached
+ * - VFO_STATE_ALARM: Alarm/special mode active
+ */
 void RADIO_SetVfoState(VfoState_t State)
 {
     if (State == VFO_STATE_NORMAL) {
@@ -1078,6 +1194,23 @@ void RADIO_SetVfoState(VfoState_t State)
 }
 
 
+// ============================================================================
+// TRANSMISSION MANAGEMENT
+// ============================================================================
+
+/**
+ * @brief Prepare radio for transmission with all safety checks
+ * 
+ * Checks:
+ * - TX frequency is allowed
+ * - Battery level sufficient
+ * - Not over-voltage
+ * - Channel not busy (if enabled)
+ * - Mode supports TX (AM restriction check)
+ * - Config upload/download not in progress
+ * 
+ * Sets TX timeout based on user-configured limit
+ */
 void RADIO_PrepareTX(void)
 {
     VfoState_t State = VFO_STATE_NORMAL;  // default to OK to TX
@@ -1207,6 +1340,10 @@ void RADIO_PrepareTX(void)
 #endif
 }
 
+/**
+ * @brief Send CTCSS/DCS tail tone for receiver squelch muting
+ * Allows proper squelch closure on receiving radios
+ */
 void RADIO_SendCssTail(void)
 {
     switch (gCurrentVfo->pTX->CodeType) {
@@ -1222,6 +1359,10 @@ void RADIO_SendCssTail(void)
     SYSTEM_DelayMs(200);
 }
 
+/**
+ * @brief Finalize transmission and send end-of-transmission markers
+ * Sends roger beep, DTMF end-of-transmission, and CSS tail if enabled
+ */
 void RADIO_SendEndOfTransmission(void)
 {
     BK4819_PlayRoger();
@@ -1233,6 +1374,10 @@ void RADIO_SendEndOfTransmission(void)
     RADIO_SetupRegisters(false);
 }
 
+/**
+ * @brief Prepare CSS tail transmission and restore RX
+ * Used for CSS-based transmissions to properly terminate the transmission
+ */
 void RADIO_PrepareCssTX(void)
 {
     RADIO_PrepareTX();

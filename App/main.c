@@ -324,14 +324,28 @@ void Main(void)
         #endif
     #endif
         
-    while (true) {
+    // ============================================================================
+    // MAIN EVENT LOOP - Timeslice-based architecture
+    // ============================================================================
+    // The radio operates on a timeslice system:
+    // - gNextTimeslice: 10ms tick (base timeslice)
+    // - gNextTimeslice_500ms: 500ms tick (occurs every 50 x 10ms)
+    // This allows efficient multitasking without blocking interrupts
+    // ============================================================================
+    while (true)
+    {
+        // Process continuous updates (e.g., display refresh, status checks)
         APP_Update();
 
-        if (gNextTimeslice) {
-
+        // Handle 10ms timeslice events
+        if (gNextTimeslice)
+        {
+            // Execute all 10ms-based operations (button polling, state machines, etc.)
             APP_TimeSlice10ms();
 
-            if (gNextTimeslice_500ms) {
+            // Execute 500ms operations (battery monitoring, UI updates, etc.)
+            if (gNextTimeslice_500ms)
+            {
                 APP_TimeSlice500ms();
             }
         }
