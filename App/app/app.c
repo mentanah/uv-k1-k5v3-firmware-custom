@@ -2137,7 +2137,9 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
         ProcessKeysFunctions[gScreenToDisplay](Key, bKeyPressed, bKeyHeld);
     }
     else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && gScreenToDisplay != DISPLAY_INVALID) {
-        ProcessKeysFunctions[gScreenToDisplay](Key, bKeyPressed, bKeyHeld);
+        //#################################################################
+        // here key are really processed!
+        ProcessKeysFunctions[gScreenToDisplay](Key, bKeyPressed, bKeyHeld);  
     }
 #else
     else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && gScreenToDisplay != DISPLAY_INVALID) {
