@@ -34,9 +34,6 @@ enum GUI_DisplayType_t
     DISPLAY_AIRCOPY,
 #endif
 
-#ifdef ENABLE_REGA
-    DISPLAY_REGA,
-#endif
 
     DISPLAY_N_ELEM,
     DISPLAY_INVALID = 0xFFu

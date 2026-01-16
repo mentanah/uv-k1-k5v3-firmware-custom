@@ -41,9 +41,7 @@
 #include "settings.h"
 #include "ui/inputbox.h"
 #include "ui/ui.h"
-#ifdef ENABLE_REGA
-    #include "app/rega.h"
-#endif
+
 
 #if defined(ENABLE_FMRADIO)
 static void ACTION_Scan_FM(bool bRestart);
@@ -117,10 +115,6 @@ void (*action_opt_table[])(void) = {
 
 #else
     [ACTION_OPT_RXMODE] = &FUNCTION_NOP,
-#endif
-#ifdef ENABLE_REGA
-    [ACTION_OPT_REGA_ALARM] = &ACTION_RegaAlarm,
-    [ACTION_OPT_REGA_TEST] = &ACTION_RegaTest,
 #endif
 };
 
