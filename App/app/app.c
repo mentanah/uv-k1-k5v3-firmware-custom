@@ -86,6 +86,28 @@ static bool flagSaveChannel;
 static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld);
 
 
+// ============================================================================
+// KEY PROCESSING DISPATCH TABLE
+// ============================================================================
+// Maps display modes to their key handler functions
+//
+// FLOW: ProcessKey() calls ProcessKeysFunctions[gScreenToDisplay](Key, ...)
+//
+// HANDLERS:
+//   DISPLAY_MAIN: MAIN_ProcessKeys() - Numeric entry, frequency step
+//   DISPLAY_MENU: MENU_ProcessKeys() - Settings navigation/editing
+//   DISPLAY_SCANNER: SCANNER_ProcessKeys() - Scanner control
+//   DISPLAY_FM: FM_ProcessKeys() - FM radio control [ENABLE_FMRADIO]
+//   DISPLAY_AIRCOPY: AIRCOPY_ProcessKeys() - Channel copy [ENABLE_AIRCOPY]
+//
+// DEPENDENCIES:
+//   - app/main.h: MAIN_ProcessKeys()
+//   - app/menu.h: MENU_ProcessKeys()
+//   - app/scanner.h: SCANNER_ProcessKeys()
+//   - app/fm.h: FM_ProcessKeys() [ENABLE_FMRADIO]
+//   - app/aircopy.h: AIRCOPY_ProcessKeys() [ENABLE_AIRCOPY]
+// ============================================================================
+
 void (*ProcessKeysFunctions[])(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) = {
     [DISPLAY_MAIN] = &MAIN_ProcessKeys,
     [DISPLAY_MENU] = &MENU_ProcessKeys,
@@ -977,9 +999,6 @@ void APP_Update(void)
                 //if (gKeyReading1 != KEY_INVALID)
                 //  gPttWasReleased = true;
             }
-            #if defined(ENABLE_FEAT_F4HWN_CTR) || defined(ENABLE_FEAT_F4HWN_INV)
-            ST7565_ContrastAndInv();
-            #endif
         }
 #endif
 

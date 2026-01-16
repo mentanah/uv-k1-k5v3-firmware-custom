@@ -57,22 +57,30 @@ bool              gAskToSave;
 bool              gAskToDelete;
 
 // ============================================================================
-// DISPLAY FUNCTION TABLE
+// DISPLAY FUNCTION DISPATCH TABLE
+// ============================================================================
+// Maps display mode enums to rendering functions
+// Used by GUI_DisplayScreen() to call the appropriate display renderer
+// Each function is responsible for:
+//   1. Clearing/initializing frame buffer
+//   2. Rendering all UI elements
+//   3. Calling ST7565_BlitFullScreen() to update LCD
+//
+// DEPENDENCIES:
+//   - ui/main.h: UI_DisplayMain() - VFO frequency display
+//   - ui/menu.h: UI_DisplayMenu() - Settings menu
+//   - ui/scanner.h: UI_DisplayScanner() - Channel scanner
+//   - ui/fmradio.h: UI_DisplayFM() - FM radio [ENABLE_FMRADIO]
+//   - ui/aircopy.h: UI_DisplayAircopy() - Air copy [ENABLE_AIRCOPY]
 // ============================================================================
 
-/**
- * @brief Function pointer table mapping display types to rendering functions
- * Allows dynamic dispatch of display rendering based on current mode
- */
 void (*UI_DisplayFunctions[])(void) = {
     [DISPLAY_MAIN] = &UI_DisplayMain,
     [DISPLAY_MENU] = &UI_DisplayMenu,
     [DISPLAY_SCANNER] = &UI_DisplayScanner,
-
 #ifdef ENABLE_FMRADIO
     [DISPLAY_FM] = &UI_DisplayFM,
 #endif
-
 #ifdef ENABLE_AIRCOPY
     [DISPLAY_AIRCOPY] = &UI_DisplayAircopy,
 #endif
@@ -82,79 +90,94 @@ void (*UI_DisplayFunctions[])(void) = {
 static_assert(ARRAY_SIZE(UI_DisplayFunctions) == DISPLAY_N_ELEM);
 
 // ============================================================================
-// DISPLAY RENDERING
+// DISPLAY RENDERING DISPATCHER
 // ============================================================================
-
-/**
- * @brief Render the currently selected display mode to LCD
- * 
- * Dispatches to the appropriate display function based on gScreenToDisplay
- * Does nothing if gScreenToDisplay is DISPLAY_INVALID
- */
+// Called by APP_TimeSlice10ms() when gUpdateDisplay flag is set
+// Renders the current display to LCD via frame buffer
+//
+// FLOW:
+//   1. Check if valid display mode is selected
+//   2. Call appropriate renderer from dispatch table
+//   3. Renderer updates gFrameBuffer[][]
+//   4. Renderer calls ST7565_BlitFullScreen() to push to LCD
+// ============================================================================
 void GUI_DisplayScreen(void)
 {
-    // Only render if a valid display mode is selected
     if (gScreenToDisplay != DISPLAY_INVALID)
     {
         UI_DisplayFunctions[gScreenToDisplay]();
     }
 }
 
-/**
- * @brief Request a display mode change with automatic state cleanup
- * @param Display Target display mode to transition to
- * 
- * Prevents duplicate updates by checking if display is already active.
- * Clears all transient UI state to prevent state leakage between displays:
- * - Input box data (menu/frequency entry)
- * - Menu navigation state
- * - Scanning state
- * - DTMF state
- * - Confirmation dialogs
- * 
- * Batches state changes before triggering display update to minimize
- * flickering and ensure consistent rendering.
- */
+// ============================================================================
+// DISPLAY MODE TRANSITION HANDLER
+// ============================================================================
+// Transitions between display modes with automatic state cleanup
+//
+// CALLED FROM:
+//   - app/app.c: ProcessKey() - User navigation
+//   - app/action.c: ACTION_FM(), ACTION_Monitor() - Feature activation
+//   - main.c: BOOT_ProcessMode() - Boot mode selection
+//   - Various ProcessKeys handlers - Navigation actions
+//
+// STATE CLEANUP SEQUENCE (executed only on display change):
+//   1. Clear DTMF input box (gDTMF_InputBox, gDTMF_InputBox_Index)
+//   2. Reset menu input state (gInputBoxIndex, gIsInSubMenu)
+//   3. Stop active scans (gCssBackgroundScan, gScanStateDir, gFM_ScanState)
+//   4. Clear dialogs (gAskForConfirmation, gAskToSave, gAskToDelete)
+//   5. Reset special keys (gWasFKeyPressed)
+//   6. Set update flags (gUpdateStatus, gUpdateDisplay)
+//
+// DEPENDENCIES (state management):
+//   - dtmf.h: DTMF_clear_input_box()
+//   - app/chFrScanner.h: CHFRSCANNER_Start(), CHFRSCANNER_Stop()
+//   - app/scanner.h: SCANNER state variables
+//   - app/fm.h: FM state variables [ENABLE_FMRADIO]
+//   - misc.h: Global state variables
+// ============================================================================
 void GUI_SelectNextDisplay(GUI_DisplayType_t Display)
 {
-    // Reject invalid display requests
     if (Display == DISPLAY_INVALID)
         return;
 
-    // Only perform state cleanup if switching to a different display
+    // Only cleanup state if actually changing displays
     if (gScreenToDisplay != Display)
     {
-        // Clear DTMF input box
+        // ====================================================================
+        // CLEAR DTMF INPUT STATE
+        // ====================================================================
+        // Remove any pending DTMF characters from input box
         DTMF_clear_input_box();
 
-        // ============================================================
-        // RESET TRANSIENT UI STATE
-        // ============================================================
+        // ====================================================================
+        // RESET MENU/FREQUENCY INPUT STATE
+        // ====================================================================
+        gInputBoxIndex       = 0;      // Clear frequency/channel entry
+        gIsInSubMenu         = false;  // Exit submenu navigation
         
-        // Clear menu/frequency input state
-        gInputBoxIndex       = 0;
-        
-        // Exit submenu navigation
-        gIsInSubMenu         = false;
-        
-        // Stop any active scans (CSS tone scanning)
-        gCssBackgroundScan   = false;
-        gScanStateDir        = SCAN_OFF;
+        // ====================================================================
+        // STOP ALL ACTIVE SCANS
+        // ====================================================================
+        gCssBackgroundScan   = false;  // Stop CSS tone scan
+        gScanStateDir        = SCAN_OFF; // Stop channel scan
         
 #ifdef ENABLE_FMRADIO
-        // Reset FM radio scanning state
-        gFM_ScanState        = FM_SCAN_OFF;
+        gFM_ScanState        = FM_SCAN_OFF; // Stop FM scan
 #endif
         
-        // Clear confirmation dialogs
-        gAskForConfirmation  = 0;
-        gAskToSave           = false;
-        gAskToDelete         = false;
+        // ====================================================================
+        // CLEAR CONFIRMATION DIALOGS
+        // ====================================================================
+        gAskForConfirmation  = 0;      // Clear confirm/delete prompts
+        gAskToSave           = false;  // Clear save changes dialog
+        gAskToDelete         = false;  // Clear delete confirmation
         
-        // Clear special key press flags
-        gWasFKeyPressed      = false;
+        // ====================================================================
+        // RESET SPECIAL KEY STATES
+        // ====================================================================
+        gWasFKeyPressed      = false;  // Clear F-key state
 
-        // Signal that display and status need refresh
+        // Signal display refresh needed
         gUpdateStatus        = true;
     }
 

@@ -26,8 +26,8 @@
  */
 enum GUI_DisplayType_t
 {
-    DISPLAY_MAIN = 0,              ///< Main frequency/channel display
-    DISPLAY_MENU,                  ///< Menu system
+    DISPLAY_MAIN = 0,              ///< VFO frequency/channel display
+    DISPLAY_MENU,                  ///< Settings menu system
     DISPLAY_SCANNER,               ///< Channel/frequency scanner
 
 #ifdef ENABLE_FMRADIO
@@ -38,8 +38,8 @@ enum GUI_DisplayType_t
     DISPLAY_AIRCOPY,               ///< Air copy (channel transfer) mode
 #endif
 
-    DISPLAY_N_ELEM,                ///< Total number of display modes
-    DISPLAY_INVALID = 0xFFu        ///< Invalid/uninitialized display
+    DISPLAY_N_ELEM,                ///< Total display count
+    DISPLAY_INVALID = 0xFFu        ///< Invalid/uninitialized
 };
 
 typedef enum GUI_DisplayType_t GUI_DisplayType_t;
@@ -82,4 +82,38 @@ void GUI_DisplayScreen(void);
  */
 void GUI_SelectNextDisplay(GUI_DisplayType_t Display);
 
+// ============================================================================
+// DISPLAY MANAGEMENT MODULE - Screen Switching and State Management
+// ============================================================================
+//
+// RESPONSIBILITIES:
+//   - Manage display mode transitions (main, menu, scanner, FM, aircopy)
+//   - Dispatch rendering to appropriate display function
+//   - Clean up transient UI state during screen changes
+//   - Queue display updates and status refreshes
+//
+// DEPENDENCIES:
+//   - ui/main.h (UI_DisplayMain)
+//   - ui/menu.h (UI_DisplayMenu)
+//   - ui/scanner.h (UI_DisplayScanner)
+//   - app/fm.h (UI_DisplayFM) [ENABLE_FMRADIO]
+//   - app/aircopy.h (UI_DisplayAircopy) [ENABLE_AIRCOPY]
+//
+// KEY CONCEPTS:
+//   - gScreenToDisplay: Current active display mode
+//   - gRequestDisplayScreen: Next display to activate (queued)
+//   - Transient state: Input boxes, menus, dialogs cleared on transitions
+//   - Display dispatch table: Function pointers for each display mode
+//
+// GLOBAL STATE CLEARED ON DISPLAY CHANGE:
+//   - gInputBoxIndex: Menu/frequency entry state
+//   - gIsInSubMenu: Menu navigation level
+//   - gCssBackgroundScan: CSS tone scanning
+//   - gScanStateDir: Scanner direction
+//   - gFM_ScanState: FM radio scanning state
+//   - gAskForConfirmation: Confirmation dialogs
+//   - gAskToSave, gAskToDelete: Action confirmation flags
+//   - gWasFKeyPressed: F-key state
+//
+// ============================================================================
 #endif

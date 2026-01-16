@@ -17,6 +17,32 @@
 #ifndef UI_MAIN_H
 #define UI_MAIN_H
 
+// ============================================================================
+// MAIN DISPLAY MODULE - VFO Frequency/Channel Display
+// ============================================================================
+// 
+// RESPONSIBILITIES:
+//   - Render primary VFO display (frequency, channel, modulation, power)
+//   - Display signal strength indicators (RSSI bar, antenna bars)
+//   - Show audio level bar during transmission
+//   - Manage center line (shared display area for multiple features)
+//   - Handle TX/RX status indicators
+//   - Display scan list participation symbols
+//
+// DEPENDENCIES:
+//   - radio.h (VFO_Info_t, VfoState_t, modulation types)
+//   - frequencies.h (frequency band definitions)
+//   - driver/bk4819.h (signal level reading)
+//   - bitmaps.h (antenna, VFO, scan list icons)
+//   - audio.h (audio level measurement)
+//
+// KEY DATA STRUCTURES:
+//   - center_line_t: Enum tracking which feature uses the center line
+//   - VFO_Info_t: VFO configuration (frequency, modulation, power, etc)
+//   - VfoState_t: VFO state (normal, busy, low battery, timeout, etc)
+//
+// ============================================================================
+
 /**
  * @enum center_line_t
  * @brief Enumeration for center display line usage
@@ -27,13 +53,13 @@
  * - CHARGE_DATA: Battery charging information
  */
 enum center_line_t {
-    CENTER_LINE_NONE = 0,           ///< Center line is available for use
-    CENTER_LINE_IN_USE,              ///< Center line reserved for feature output
-    CENTER_LINE_AUDIO_BAR,           ///< Audio level bar displayed
-    CENTER_LINE_RSSI,                ///< RSSI level bar displayed
-    CENTER_LINE_AM_FIX_DATA,         ///< AM fix debug data displayed
+    CENTER_LINE_NONE = 0,           ///< Center line available for use
+    CENTER_LINE_IN_USE,              ///< Reserved by active feature
+    CENTER_LINE_AUDIO_BAR,           ///< Audio level during TX
+    CENTER_LINE_RSSI,                ///< Signal strength indicator
+    CENTER_LINE_AM_FIX_DATA,         ///< AM demodulation debug data
     CENTER_LINE_DTMF_DEC,            ///< Live DTMF decoder output
-    CENTER_LINE_CHARGE_DATA          ///< Battery charging data displayed
+    CENTER_LINE_CHARGE_DATA          ///< Battery charging info
 };
 
 /**
@@ -41,9 +67,9 @@ enum center_line_t {
  * @brief VFO transmission/reception mode indicator
  */
 enum Vfo_txtr_mode {
-    VFO_MODE_NONE = 0,              ///< No active TX/RX
-    VFO_MODE_TX = 1,                ///< Transmitting on this VFO
-    VFO_MODE_RX = 2,                ///< Receiving on this VFO
+    VFO_MODE_NONE = 0,              ///< No activity on this VFO
+    VFO_MODE_TX = 1,                ///< Currently transmitting
+    VFO_MODE_RX = 2,                ///< Currently receiving
 };
 
 typedef enum center_line_t center_line_t;
