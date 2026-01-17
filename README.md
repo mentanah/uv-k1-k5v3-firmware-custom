@@ -11,7 +11,7 @@ A big thanks to DualTachyon, who paved the way by releasing the very first open-
 
 
 
-# this fork bring the Calypso Edition to life based on F4HNW v4.3.2
+# this fork brings the Calypso Edition to life based on F4HNW v4.3.2
 changes according to my personal favorisation:
 
 * fix a common issue regarding eprom crash in main VFO on held buttons
