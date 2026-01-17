@@ -14,6 +14,8 @@ A big thanks to DualTachyon, who paved the way by releasing the very first open-
 # this fork bring the Calypso Edition to life based on F4HNW v4.3.2
 changes according to my personal favorisation:
 
+* fix a common issue regarding eprom crash in main VFO on held buttons
+* reduced reception noise (especially in air band) by limiting display traffic
 * improving AM reception by disabling AM_FIX and AM AGC adjustement plus adapting audio filter for AM acording to stock fw
 * enabling scrambler feature again (Armel forgive me)
 
