@@ -1319,7 +1319,7 @@ void SETTINGS_UpdateChannel(uint8_t channel, const VFO_Info_t *pVFO, bool keep, 
             };        // default attributes
 
         // 0x0D60
-        PY25Q16_ReadBuffer(0x002000 + channel, &state, 1);
+        PY25Q16_ReadBuffer(0x008000 + (channel * 2), &state, 2);
 
         if (keep) {
             att.band = pVFO->Band;
