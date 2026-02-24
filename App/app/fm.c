@@ -124,7 +124,12 @@ void FM_TurnOff(void)
 
 void FM_EraseChannels(void)
 {
-    PY25Q16_SectorErase(0x003000);
+    //PY25Q16_SectorErase(0x003000);
+    
+    uint8_t clearBuf[128];
+    memset(clearBuf, 0xFF, sizeof(clearBuf));
+    PY25Q16_WriteBuffer(0x00A028, clearBuf, sizeof(clearBuf), false);
+
     memset(gFM_Channels, 0xFF, sizeof(gFM_Channels));
 }
 

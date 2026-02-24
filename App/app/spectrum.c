@@ -103,8 +103,8 @@ RegisterSpec registerSpecs[] = {
     {},
     {"LNAs", BK4819_REG_13, 8, 0b11, 1},
     {"LNA", BK4819_REG_13, 5, 0b111, 1},
-    {"VGA", BK4819_REG_13, 0, 0b111, 1},
-    {"BPF", BK4819_REG_3D, 0, 0xFFFF, 0x2aaa},
+    {"PGA", BK4819_REG_13, 0, 0b111, 1},
+    //{"BPF", BK4819_REG_3D, 0, 0xFFFF, 0x2aaa},
     // {"MIX", 0x13, 3, 0b11, 1}, // TODO: hidden
 };
 
@@ -112,7 +112,7 @@ RegisterSpec registerSpecs[] = {
 const int8_t LNAsOptions[] = {-19, -16, -11, 0};
 const int8_t LNAOptions[] = {-24, -19, -14, -9, -6, -4, -2, 0};
 const int8_t VGAOptions[] = {-33, -27, -21, -15, -9, -6, -3, 0};
-const char *BPFOptions[] = {"8.46", "7.25", "6.35", "5.64", "5.08", "4.62", "4.23"};
+//const char *BPFOptions[] = {"8.46", "7.25", "6.35", "5.64", "5.08", "4.62", "4.23"};
 #endif
 
 uint16_t statuslineUpdateTimer = 0;
@@ -183,8 +183,10 @@ static uint16_t GetRegMenuValue(uint8_t st)
 
 void LockAGC()
 {
-    RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
-    lockAGC = true;
+    //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
+    RADIO_SetupAGC(false, lockAGC);
+    //lockAGC = true;
+    lockAGC = false;
 }
 
 static void SetRegMenuValue(uint8_t st, bool add)
@@ -947,16 +949,16 @@ uint8_t Rssi2Y(uint16_t rssi)
                 // Total width units = (bars - 1) full bars + 2 half bars = bars
                 // First bar: half width, middle bars: full width, last bar: half width
                 // Scale: 128 pixels / (bars - 1) = pixels per full bar
-                uint16_t fullWidth = 128 * 2 / (bars - 1);  // x2 for precision
+                uint16_t fullWidth = (128 << 8) / (bars - 1);  // x256 for precision
                 
                 if (i == 0)
                 {
-                    x = fullWidth / 4;  // half of half (because fullWidth is x2)
+                    x = fullWidth / (2 << 8);  // half of /256 (because fullWidth is x256)
                 }
                 else
                 {
                     // Position = half + (i-1) full bars + current bar
-                    x = fullWidth / 4 + (uint16_t)i * fullWidth / 2;
+                    x = fullWidth / (2 << 8) + (uint16_t)i * fullWidth / (1 << 8);
                     if (i == bars - 1) x = 128;  // Last bar ends at screen edge
                 }
             }
@@ -1334,20 +1336,20 @@ void OnKeyDownStill(KEY_Code_t key)
         UpdateDBMax(false);
         break;
 
-    case KEY_UP:  
+    case KEY_UP:
         if(gUpDnButtonToLeftRight != 0){
             if (menuState)
             {
                 SetRegMenuValue(menuState, false);
-                break;
-            }
+            break;
+        }
             UpdateCurrentFreqStill(false);
         }
         else{
             if (menuState)
             {
                 SetRegMenuValue(menuState, true);
-                break;
+        break;
             }
             UpdateCurrentFreqStill(true);
         }
@@ -1358,15 +1360,15 @@ void OnKeyDownStill(KEY_Code_t key)
             if (menuState)
             {
                 SetRegMenuValue(menuState, true);
-                break;
-            }
+            break;
+        }
             UpdateCurrentFreqStill(true);
         }
         else{
             if (menuState)
             {
                 SetRegMenuValue(menuState, false);
-                break;
+        break;
             }
             UpdateCurrentFreqStill(false);
         }
@@ -1437,7 +1439,7 @@ static void RenderStatus()
 static void RenderSpectrum()
 {
     DrawTicks();
-    DrawArrow(128u * peak.i / GetStepsCount());
+    DrawArrow(128u * peak.i / (GetStepsCount() - 1));
     DrawSpectrum();
     DrawRssiTriggerLevel();
     DrawF(peak.f);
@@ -1489,9 +1491,9 @@ static void RenderStill()
     uint8_t offset = PAD_LEFT;
     uint8_t row = 4;
 
-    for (int i = 0, idx = 1; idx <= 4; ++i, ++idx)
+    for (int i = 0, idx = 1; idx <= 3; ++i, ++idx)
     {
-        if (idx == 5)
+        if (idx == 4)
         {
             row += 2;
             i = 0;
@@ -1522,10 +1524,12 @@ static void RenderStill()
         {
             sprintf(String, "%ddB", VGAOptions[GetRegMenuValue(idx)]);
         }
+        /*
         else if(idx == 4)
         {
             sprintf(String, "%skHz", BPFOptions[(GetRegMenuValue(idx) / 0x2aaa)]);
         }
+        */
 #else
         sprintf(String, "%u", GetRegMenuValue(idx));
 #endif
@@ -1616,7 +1620,7 @@ static void UpdateScan()
 {
     Scan();
 
-    if (scanInfo.i < scanInfo.measurementsCount)
+    if (scanInfo.i + 1 < scanInfo.measurementsCount)
     {
         NextScanStep();
         return;

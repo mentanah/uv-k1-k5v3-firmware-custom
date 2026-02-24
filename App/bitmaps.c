@@ -170,6 +170,7 @@ const uint8_t BITMAP_VFO_Lock[7] =
     0b01111100,
 };
 
+/*
 const uint8_t BITMAP_VFO_Default[7] =
 {
     0b01111111,
@@ -180,7 +181,22 @@ const uint8_t BITMAP_VFO_Default[7] =
     0b00011100,
     0b00001000
 };
+*/
 
+const uint8_t BITMAP_VFO_Default[7] =
+{
+    0b01100011, 
+    0b01110111, 
+    0b01111111, 
+    0b01111111, 
+    0b00111110, 
+    0b00011100, 
+    0b00001000
+
+};
+
+
+/*
 const uint8_t BITMAP_VFO_NotDefault[7] =
 {
     0b01000001,
@@ -191,6 +207,23 @@ const uint8_t BITMAP_VFO_NotDefault[7] =
     0b00010100,
     0b00001000
 };
+*/
+
+const uint8_t BITMAP_VFO_NotDefault[7] =
+{
+    0b00000000, 
+    0b00000000, 
+    0b00000000, 
+    0b01000001, 
+    0b00100010, 
+    0b00010100, 
+    0b00001000
+};
+
+
+
+
+
 
 const uint8_t BITMAP_ScanList0[7] =
 {   // '0' symbol
