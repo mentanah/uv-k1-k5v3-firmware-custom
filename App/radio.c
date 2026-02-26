@@ -1073,7 +1073,7 @@ void RADIO_SetModulation(ModulationMode_t modulation)
             mod = BK4819_AF_FM;
             break;
         case MODULATION_AM:
-            mod = BK4819_AF_FM; // AM no longer needs special AF setting
+            mod = BK4819_AF_FM;  // AM no longer needs special AF setting, if set to AM reception is very weak
             break;
         case MODULATION_USB:
             mod = BK4819_AF_BASEBAND2;
