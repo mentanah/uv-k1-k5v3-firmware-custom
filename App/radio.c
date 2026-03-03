@@ -1093,7 +1093,7 @@ void RADIO_SetModulation(ModulationMode_t modulation)
     
     if (modulation != MODULATION_AM)
     {
-        uint16_t uVar1 = BK4819_ReadRegister(REG_31);
+        uint16_t uVar1 = BK4819_ReadRegister(0x31);
         BK4819_WriteRegister(0x31,uVar1 & 0xFFFFFFFE);  
         // enable function
         //   |?????????????|CMPDR|VOX|SCR|
