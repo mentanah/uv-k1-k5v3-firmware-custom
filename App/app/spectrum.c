@@ -183,8 +183,8 @@ static uint16_t GetRegMenuValue(uint8_t st)
 
 void LockAGC()
 {
+    RADIO_SetupAGC(gRxVfo->Modulation == MODULATION_AM, false);
     //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
-    RADIO_SetupAGC(false, lockAGC);
     //lockAGC = true;
     lockAGC = false;
 }
@@ -352,7 +352,7 @@ static void SetF(uint32_t f)
 {
     fMeasure = f;
 
-    BK4819_SetFrequency(fMeasure);
+    BK4819_SetFrequency(fMeasure);  
     BK4819_PickRXFilterPathBasedOnFrequency(fMeasure);
     uint16_t reg = BK4819_ReadRegister(BK4819_REG_30);
     BK4819_WriteRegister(BK4819_REG_30, 0);
