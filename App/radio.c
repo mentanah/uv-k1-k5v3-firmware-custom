@@ -1073,7 +1073,7 @@ void RADIO_SetModulation(ModulationMode_t modulation)
             mod = BK4819_AF_FM;
             break;
         case MODULATION_AM:
-            mod = BK4819_AF_FM;  // AM no longer needs special AF setting, if set to AM reception is very weak
+            mod = BK4819_AF_FM;  // AM no longer needs special AF setting, if set to AM, reception is very weak
             break;
         case MODULATION_USB:
             mod = BK4819_AF_BASEBAND2;
@@ -1090,22 +1090,41 @@ void RADIO_SetModulation(ModulationMode_t modulation)
     }
 
     BK4819_SetAF(mod);
-
-    // HACK, FIXME:
-    // What follows is a direct copy of the AM enable/disable code from
-    // the original UV-K1 firmware. It is not clear why these specific register
-    // values are used for AM all of a sudden instead of the AF setting like on
-    // the BK4819, nor what exactly they do.
-    // So for now we just keep it as is to maintain compatibility.
-    //
+    
     if (modulation != MODULATION_AM)
     {
-        uint16_t uVar1 = BK4819_ReadRegister(0x31);
-        BK4819_WriteRegister(0x31,uVar1 & 0xfffffffe);
+        uint16_t uVar1 = BK4819_ReadRegister(REG_31);
+        BK4819_WriteRegister(0x31,uVar1 & 0xFFFFFFFE);  
+        // enable function
+        //   |?????????????|CMPDR|VOX|SCR|
+        // 0b|?????????????|xxx
+        
         BK4819_WriteRegister(0x42,0x6b5a);
-        BK4819_WriteRegister(0x2a,0x7400);
-        BK4819_WriteRegister(0x2b,0);
-        BK4819_WriteRegister(0x2f,0x9890);
+        // not documented
+
+        BK4819_WriteRegister(0x2A,0x7400); // 0b01 110100 00 000 000
+        // noise gate time constant
+        //   |??|const |??|release|attac|
+        // 0b|??|xxxxxx|??|xxx|xxx
+        // 000 = 0ms
+        // 001 = 6ms
+        // 010 = 12ms
+        // 011 = 24ms
+        // 100 = 48ms
+        // 101 = 96ms
+        // 110 = 192ms
+        // 111 = 384ms
+
+        BK4819_WriteRegister(0x2B,0); // 0b00000 000 00000 0 0 0
+        // disable AF: Rx HPF300, Rx LPF3K, Tx HPF300, Tx LPF1
+        //   |?????|RxHPF300|RxLPF3K|de-emph|?????|TxHPF300|TxLPF1|pre-emph|
+        // 0b|?????|x|x|x|?????|x|x|x
+
+        BK4819_WriteRegister(0x2F,0x9890);
+        // de-emph gain, Tx Limit Factor, Tx Limit Thrshld 
+        //   |??|
+        // 0b|??|xxxxxx|xxx|xxxxx|
+
 
         // stock firmware values:
         BK4819_WriteRegister(0x54, 0x9009);

@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include "driver/bk4819-regs.h"
+#include "driver/bk4829-regs.h"
 
 enum BK4819_AF_Type_t
 {
