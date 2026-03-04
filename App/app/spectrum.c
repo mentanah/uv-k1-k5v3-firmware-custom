@@ -502,8 +502,9 @@ static void ToggleRX(bool on)
     }
     #endif
     isListening = on;
-
-    RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
+    
+    RADIO_SetupAGC(settings.modulationType == MODULATION_AM, false);
+    //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
     BK4819_ToggleGpioOut(BK4819_GPIO6_PIN2_GREEN, on);
 
     ToggleAudio(on);
@@ -1679,9 +1680,9 @@ static void UpdateListening()
 
     if (currentState == SPECTRUM)
     {
-        BK4819_WriteRegister(0x43, GetBWRegValueForScan());
+        //BK4819_WriteRegister(0x43, GetBWRegValueForScan());  // calypso marker here the helicopter fires up!
         Measure();
-        BK4819_WriteRegister(0x43, listenBWRegValues[settings.listenBw]);
+        //BK4819_WriteRegister(0x43, listenBWRegValues[settings.listenBw]);
     }
     else
     {

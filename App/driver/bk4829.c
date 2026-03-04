@@ -317,7 +317,7 @@ void BK4819_SetAGC(bool enable)
 
     BK4819_WriteRegister(BK4819_REG_7E, (regVal & ~(1 << 15) & ~(0b111 << 12))
         | (!enable << 15)   // 0  AGC fix mode
-        | (3u << 12)       // 3  AGC fix index
+        | (3u << 12)        // 3  AGC fix index
     );
 
     // if(enable) {
