@@ -157,20 +157,21 @@ void UI_DisplayStatus()
         } else {
             //memcpy(gStatusLine + POS_MOD, gFontS, sizeof(gFontS));
             gStatusLine[POS_MOD++] = 0x7F;
-            gStatusLine[POS_MOD++] = 0x41;
-            gStatusLine[POS_MOD++] = 0x63;
-            gStatusLine[POS_MOD++] = 0x55;
-            gStatusLine[POS_MOD++] = 0x49;
-            gStatusLine[POS_MOD++] = 0x63;
-            gStatusLine[POS_MOD++] = 0x77;
-            gStatusLine[POS_MOD++] = 0x5D;
-            gStatusLine[POS_MOD++] = 0x49;
-            gStatusLine[POS_MOD++] = 0x63;
-            gStatusLine[POS_MOD++] = 0x77;
-            gStatusLine[POS_MOD++] = 0x5D;
-            gStatusLine[POS_MOD++] = 0x49;
-            gStatusLine[POS_MOD++] = 0x41;
             gStatusLine[POS_MOD++] = 0x7F;
+            gStatusLine[POS_MOD++] = 0x5D;
+            gStatusLine[POS_MOD++] = 0x49;
+            gStatusLine[POS_MOD++] = 0x41;
+            gStatusLine[POS_MOD++] = 0x63;
+            gStatusLine[POS_MOD++] = 0x77;
+            gStatusLine[POS_MOD++] = 0x7F;
+            gStatusLine[POS_MOD++] = 0x5D;
+            gStatusLine[POS_MOD++] = 0x49;
+            gStatusLine[POS_MOD++] = 0x41;
+            gStatusLine[POS_MOD++] = 0x63;
+            gStatusLine[POS_MOD++] = 0x77;
+            gStatusLine[POS_MOD++] = 0x7F;
+            gStatusLine[POS_MOD++] = 0x7F;
+
         }
     }
 
