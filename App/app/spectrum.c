@@ -503,7 +503,7 @@ static void ToggleRX(bool on)
     #endif
     isListening = on;
     
-    RADIO_SetupAGC(settings.modulationType == MODULATION_AM, false);
+    //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, false);
     //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
     BK4819_ToggleGpioOut(BK4819_GPIO6_PIN2_GREEN, on);
 
@@ -651,9 +651,9 @@ static void ClampRssiTriggerLevel()
 static void UpdateRssiTriggerLevel(bool inc)
 {
     if (inc)
-        settings.rssiTriggerLevel += 2;
+        settings.rssiTriggerLevel += 8;
     else
-        settings.rssiTriggerLevel -= 2;
+        settings.rssiTriggerLevel -= 8;
 
     ClampRssiTriggerLevel();
 
