@@ -562,7 +562,17 @@ void APP_StartListening(FUNCTION_Type_t function)
         gEeprom.DUAL_WATCH != DUAL_WATCH_OFF)
     {   // not scanning, dual watch is enabled
 
-        gDualWatchCountdown_10ms = dual_watch_count_after_2_10ms;
+        //gDualWatchCountdown_10ms = dual_watch_count_after_2_10ms;
+
+        const bool isMainTxDualRx =
+        (gEeprom.DUAL_WATCH != DUAL_WATCH_OFF) &&
+        (gEeprom.CROSS_BAND_RX_TX != CROSS_BAND_OFF);
+
+        // Use a short hold only for MAIN TX DUAL RX, keep legacy hold otherwise
+        gDualWatchCountdown_10ms = isMainTxDualRx
+            ? dual_watch_count_after_2_10ms / 4 // Short timer = 420 / 4 ...
+            : dual_watch_count_after_2_10ms;
+
         gScheduleDualWatch       = false;
 
         // when crossband is active only the main VFO should be used for TX
