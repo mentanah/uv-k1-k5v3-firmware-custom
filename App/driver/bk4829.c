@@ -135,12 +135,12 @@ void BK4819_Init(void)
     //         15 = max
     //          0 = min
     //
-    BK4819_WriteRegister(BK4819_REG_48, //  0xB3A8);     // 1011 00 111010 1000
+    BK4819_WriteRegister(BK4819_REG_48, 0x33A8);     // 0011 0011 1010 1000
         // (11u << 12) |     // ??? 0..15
         // ( 0u << 10) |     // AF Rx Gain-1
         // (58u <<  4) |     // AF Rx Gain-2
         // ( 8u <<  0));     // AF DAC Gain (after Gain-1 and Gain-2)
-        0x33A8);
+      
 
     BK4819_WriteRegister(0x40, 0x3516);
 

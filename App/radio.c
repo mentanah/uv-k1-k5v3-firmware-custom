@@ -1094,12 +1094,12 @@ void RADIO_SetModulation(ModulationMode_t modulation)
     if (modulation != MODULATION_AM)
     {
         uint16_t uVar1 = BK4819_ReadRegister(0x31);
-        BK4819_WriteRegister(0x31,uVar1 & 0xFFFFFFFE);  
+        BK4819_WriteRegister(0x31,uVar1 & 0xFFFFFFFE); // disable scrambler 
         // enable function
         //   |?????????????|CMPDR|VOX|SCR|
         // 0b|?????????????|xxx
         
-        BK4819_WriteRegister(0x42,0x6b5a);
+        BK4819_WriteRegister(0x42,0x6B5A); // 0b0110 1011 0101 1010
         // not documented
 
         BK4819_WriteRegister(0x2A,0x7400); // 0b01 110100 00 000 000
@@ -1120,15 +1120,17 @@ void RADIO_SetModulation(ModulationMode_t modulation)
         //   |?????|RxHPF300|RxLPF3K|de-emph|?????|TxHPF300|TxLPF1|pre-emph|
         // 0b|?????|x|x|x|?????|x|x|x
 
-        BK4819_WriteRegister(0x2F,0x9890);
+        BK4819_WriteRegister(0x2F,0x9890); // 0b10 011000 100 10000
         // de-emph gain, Tx Limit Factor, Tx Limit Thrshld 
         //   |??|
         // 0b|??|xxxxxx|xxx|xxxxx|
 
 
         // stock firmware values:
-        BK4819_WriteRegister(0x54, 0x9009);
-        BK4819_WriteRegister(0x55, 0x31a9);
+        // 300Hz AF Response coefficient for Rx
+        BK4819_WriteRegister(0x54, 0x9000);
+        // 300Hz AF Response coefficient for Rx
+        BK4819_WriteRegister(0x55, 0x31A0);
 
         // steef values
         //BK4819_WriteRegister(0x54, 0x8546);
@@ -1143,12 +1145,11 @@ void RADIO_SetModulation(ModulationMode_t modulation)
         BK4819_WriteRegister(0x2b,0x300);
         BK4819_WriteRegister(0x2f,0x9990);
 
-        // steef values
-        //BK4819_WriteRegister(0x54, 0x8546);
-        //BK4819_WriteRegister(0x55, 0x3af0);
-
-        //BK4819_WriteRegister(0x54, 0x9775);  // calypso
-        //BK4819_WriteRegister(0x55, 0x32c6);  // removed for better AM reception
+        // calypso firmware values:
+        // 300Hz AF Response coefficient for Rx
+        BK4819_WriteRegister(0x54, 0x8040);
+        // 300Hz AF Response coefficient for Rx
+        BK4819_WriteRegister(0x55, 0x3FD0);
 
         BK4819_SetFilterBandwidth(BK4819_FILTER_BW_AM, true);
     }

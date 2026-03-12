@@ -99,20 +99,22 @@ char freqInputString[11];
 uint8_t menuState = 0;
 uint16_t listenT = 0;
 
+
 RegisterSpec registerSpecs[] = {
+    // *name, reg_num, bit offset, bit mask, increment step
     {},
     {"LNAs", BK4819_REG_13, 8, 0b11, 1},
     {"LNA", BK4819_REG_13, 5, 0b111, 1},
     {"PGA", BK4819_REG_13, 0, 0b111, 1},
-    //{"BPF", BK4819_REG_3D, 0, 0xFFFF, 0x2aaa},
-    // {"MIX", 0x13, 3, 0b11, 1}, // TODO: hidden
+    {"LPF1", 0x54, 0, 0xFFFF, 0x10},
+    {"LPF2", 0x55, 0, 0xFFFF, 0x10},
 };
 
 #ifdef ENABLE_FEAT_F4HWN_SPECTRUM
 const int8_t LNAsOptions[] = {-19, -16, -11, 0};
 const int8_t LNAOptions[] = {-24, -19, -14, -9, -6, -4, -2, 0};
 const int8_t VGAOptions[] = {-33, -27, -21, -15, -9, -6, -3, 0};
-//const char *BPFOptions[] = {"8.46", "7.25", "6.35", "5.64", "5.08", "4.62", "4.23"};
+const int8_t BPFOptions[] = {1, 2, 3, 4, 5, 6};
 #endif
 
 uint16_t statuslineUpdateTimer = 0;
@@ -183,10 +185,8 @@ static uint16_t GetRegMenuValue(uint8_t st)
 
 void LockAGC()
 {
-    RADIO_SetupAGC(gRxVfo->Modulation == MODULATION_AM, false);
-    //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
-    //lockAGC = true;
     lockAGC = false;
+    RADIO_SetupAGC(gRxVfo->Modulation == MODULATION_AM, lockAGC);
 }
 
 static void SetRegMenuValue(uint8_t st, bool add)
@@ -503,7 +503,7 @@ static void ToggleRX(bool on)
     #endif
     isListening = on;
     
-    //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, false);
+    RADIO_SetupAGC(settings.modulationType == MODULATION_AM, false);
     //RADIO_SetupAGC(settings.modulationType == MODULATION_AM, lockAGC);
     BK4819_ToggleGpioOut(BK4819_GPIO6_PIN2_GREEN, on);
 
@@ -1488,13 +1488,13 @@ static void RenderStill()
     }
 
     const uint8_t PAD_LEFT = 4;
-    const uint8_t CELL_WIDTH = 30;
-    uint8_t offset = PAD_LEFT;
-    uint8_t row = 4;
+    const uint8_t CELL_WIDTH = 24;
+    uint8_t offset = 2;
+    uint8_t row = 5;
 
-    for (int i = 0, idx = 1; idx <= 3; ++i, ++idx)
+    for (int i = 0, idx = 1; idx <= 5; ++i, ++idx)
     {
-        if (idx == 4)
+        if (idx == 6)
         {
             row += 2;
             i = 0;
@@ -1525,12 +1525,15 @@ static void RenderStill()
         {
             sprintf(String, "%ddB", VGAOptions[GetRegMenuValue(idx)]);
         }
-        /*
         else if(idx == 4)
         {
-            sprintf(String, "%skHz", BPFOptions[(GetRegMenuValue(idx) / 0x2aaa)]);
+            sprintf(String, "%X", BK4819_ReadRegister(0x54));
         }
-        */
+        else if(idx == 5)
+        {
+            sprintf(String, "%X", BK4819_ReadRegister(0x55));
+        }
+
 #else
         sprintf(String, "%u", GetRegMenuValue(idx));
 #endif
@@ -1680,9 +1683,9 @@ static void UpdateListening()
 
     if (currentState == SPECTRUM)
     {
-        //BK4819_WriteRegister(0x43, GetBWRegValueForScan());  // calypso marker here the helicopter fires up!
+        BK4819_WriteRegister(0x43, GetBWRegValueForScan());
         Measure();
-        //BK4819_WriteRegister(0x43, listenBWRegValues[settings.listenBw]);
+        BK4819_WriteRegister(0x43, listenBWRegValues[settings.listenBw]);
     }
     else
     {
@@ -1695,7 +1698,7 @@ static void UpdateListening()
     #ifdef ENABLE_FEAT_F4HWN_SPECTRUM
         if ((IsPeakOverLevel() && !tailFound) || monitorMode)
         {
-            listenT = 100;
+            listenT = 1000; 
             return;
         }
     #else
